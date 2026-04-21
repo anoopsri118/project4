@@ -1,27 +1,25 @@
-def find_spammers(n, hasMessaged):
-    spammers = []
+def find_one_spammer(n, hasMessaged):
+    """Return one spammer in O(N) time, or -1 if no spammer exists."""
+    if n <= 0:
+        return -1
 
-    for account in range(1, n + 1):
-        sent_to_everyone = True
-        received_any = False
+    candidate = 1
 
-        for other in range(1, n + 1):
-            if other == account:
-                continue
+    for other in range(2, n + 1):
+        if not hasMessaged(candidate, other):
+            candidate = other
 
-            if not hasMessaged(account, other):
-                sent_to_everyone = False
+    for other in range(1, n + 1):
+        if other == candidate:
+            continue
 
-            if hasMessaged(other, account):
-                received_any = True
+        if not hasMessaged(candidate, other):
+            return -1
 
-            if not sent_to_everyone and received_any:
-                break
+        if hasMessaged(other, candidate):
+            return -1
 
-        if sent_to_everyone and not received_any:
-            spammers.append(account)
-
-    return spammers if spammers else -1
+    return candidate
 
 
 def build_has_messaged(messages):
@@ -39,7 +37,7 @@ def run_sample_tests():
             "name": "one spammer",
             "n": 4,
             "messages": {(2, 1), (2, 3), (2, 4), (1, 3), (3, 4)},
-            "expected": [2],
+            "expected": 2,
         },
         {
             "name": "no spammer because receives a message",
@@ -51,7 +49,7 @@ def run_sample_tests():
             "name": "single account",
             "n": 1,
             "messages": set(),
-            "expected": [1],
+            "expected": 1,
         },
         {
             "name": "two-way messaging means no spammer",
@@ -59,16 +57,28 @@ def run_sample_tests():
             "messages": {(1, 2), (2, 1)},
             "expected": -1,
         },
+        {
+            "name": "candidate misses one account",
+            "n": 4,
+            "messages": {(3, 1), (3, 2)},
+            "expected": -1,
+        },
+        {
+            "name": "candidate receives one message",
+            "n": 4,
+            "messages": {(2, 1), (2, 3), (2, 4), (1, 2)},
+            "expected": -1,
+        },
     ]
 
     for case in test_cases:
-        actual = find_spammers(case["n"], build_has_messaged(case["messages"]))
+        actual = find_one_spammer(case["n"], build_has_messaged(case["messages"]))
         assert actual == case["expected"], (
             f'{case["name"]}: expected {case["expected"]}, got {actual}'
         )
         print(f'{case["name"]}: {actual}')
 
-    print("All sample tests passed.")
+    print("All sample and edge-case tests passed.")
 
 
 if __name__ == "__main__":

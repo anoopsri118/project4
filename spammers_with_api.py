@@ -10,13 +10,9 @@ def find_one_spammer(n, hasMessaged):
             candidate = other
 
     for other in range(1, n + 1):
-        if other == candidate:
-            continue
-
-        if not hasMessaged(candidate, other):
-            return -1
-
-        if hasMessaged(other, candidate):
+        if other != candidate and (
+            not hasMessaged(candidate, other) or hasMessaged(other, candidate)
+        ):
             return -1
 
     return candidate
